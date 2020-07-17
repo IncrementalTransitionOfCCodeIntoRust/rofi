@@ -157,6 +157,40 @@ rofi_CFLAGS=\
 	-DPLUGIN_PATH=\"${libdir}/rofi\"\
 	-DTHEME_DIR=\"$(themedir)\"
 
+############################################################################################
+
+RUST_SOURCE =\
+	rust/Cargo.toml\
+	rust/src/lib.rs
+
+RUST_EXTRA =\
+	rust/Cargo.lock
+
+if DEBUG_RELEASE
+CARGO_RELEASE_ARGS=
+else
+CARGO_RELEASE_ARGS=--release
+endif
+
+rust_dir = $(top_srcdir)/rust
+rust_target_dir = $(rust_dir)/target
+
+check-local-rust:
+	cd $(rust_dir) && \
+	CARGO_TARGET_DIR=$(rust_target_dir) cargo test
+
+clean-local-rust:
+	cd $(rust_dir) && \
+	CARGO_TARGET_DIR=$(rust_target_dir) cargo clean
+
+RUST_LIB=$(rust_target_dir)/@RUST_TARGET_SUBDIR@/librust_internals.a
+
+$(RUST_LIB): $(RUST_SOURCE)
+	cd $(rust_dir) && \
+	CARGO_TARGET_DIR=$(rust_target_dir) cargo build --verbose $(CARGO_RELEASE_ARGS)
+
+############################################################################################
+
 rofi_LDADD=\
 	$(glib_LIBS)\
 	$(NKUTILS_LIBS)\
@@ -166,7 +200,8 @@ rofi_LDADD=\
 	$(cairo_LIBS)\
 	$(librsvg_LIBS)\
 	$(libjpeg_LIBS)\
-	$(LIBS)
+	$(LIBS)\
+	$(RUST_LIB)
 
 ##
 # Manpage
@@ -636,6 +671,8 @@ coverage-clean:
 .FORCE:
 
 EXTRA_DIST += \
+	$(RUST_SOURCE) \
+	$(RUST_EXTRA) \
 	doc/meson.build \
 	subprojects/libnkutils/meson.build \
 	subprojects/libnkutils/meson_options.txt \
