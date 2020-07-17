@@ -111,6 +111,14 @@ dnl Check dependencies
 dnl ---------------------------------------------------------------------
 PKG_PROG_PKG_CONFIG
 
+dnl ===========================================================================
+
+AC_CHECK_PROG(CARGO, [cargo], [yes], [no])
+AS_IF(test x$CARGO = xno, AC_MSG_ERROR([cargo is required.  Please install the Rust toolchain from https://www.rust-lang.org/]))
+AC_CHECK_PROG(RUSTC, [rustc], [yes], [no])
+AS_IF(test x$RUSTC = xno, AC_MSG_ERROR([rustc is required.  Please install the Rust toolchain from https://www.rust-lang.org/]))
+
+dnl ===========================================================================
 
 dnl ---------------------------------------------------------------------
 dnl PKG_CONFIG based dependencies
@@ -137,6 +145,39 @@ AC_ARG_ENABLE([check], AS_HELP_STRING([--disable-check], [Build with checks usin
 AS_IF([test "x${enable_check}" != "xno"], [ PKG_CHECK_MODULES([check],[check >= 0.11.0], [HAVE_CHECK=1]) ])
 AM_CONDITIONAL([USE_CHECK],  [test "x${enable_check}" != "xno" && test "$HAVE_CHECK" -eq 1])
 
+###############################################################################################
+
+dnl ---------------------------------------------------------------------
+dnl check - Cross Compiling
+dnl ---------------------------------------------------------------------
+
+AM_CONDITIONAL(CROSS_COMPILING, test $cross_compiling = yes)
+
+dnl ===========================================================================
+dnl Specify --enable-debug to make a development release.  By default,
+dnl we build in public release mode.
+
+AC_ARG_ENABLE(debug,
+              AC_HELP_STRING([--enable-debug],
+                             [Build Rust code with debugging information [default=no]]),
+              [debug_release=$enableval],
+              [debug_release=no])
+
+AC_MSG_CHECKING(whether to build Rust code with debugging information)
+if test "x$debug_release" = "xyes" ; then
+	AC_MSG_RESULT(yes)
+	RUST_TARGET_SUBDIR=debug
+else
+	AC_MSG_RESULT(no)
+	RUST_TARGET_SUBDIR=release
+fi
+AM_CONDITIONAL([DEBUG_RELEASE], [test "x$debug_release" = "xyes"])
+
+AC_SUBST([RUST_TARGET_SUBDIR])
+
+dnl ===========================================================================
+
+###############################################################################################
 
 dnl ---------------------------------------------------------------------
 dnl Gets the resource compile tool path.
@@ -179,6 +220,7 @@ echo "Check based tests            Enabled"
 else
 echo "Check based tests            Disabled"
 fi
+echo "Rust debugging info          ${debug_release}"
 echo "-------------------------------------"
 echo "Now type 'make' to build"
 echo ""
