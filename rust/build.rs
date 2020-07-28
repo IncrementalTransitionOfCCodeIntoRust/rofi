@@ -18,10 +18,16 @@ fn main() {
         // The input header we would like to generate
         // bindings for.
         .header("wrapper.h")
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Finish the builder and generate the bindings.
+        .clang_arg("-I/usr/include/glib-2.0")
+        .clang_arg("-I/usr/lib/glib-2.0/include")
+        .clang_arg("-I/usr/include/cairo")
+        .clang_arg("-I../include")
+        .clang_arg("-I../subprojects/libnkutils/src")
+        // .rustified_enum("hid_keyboard_keypad_usage")
+        // .rustified_enum("internal_special_keycodes")
+        // .rustified_enum("mouse_keys")
+        // .rustified_enum("quantum_keycodes")
+        .rustfmt_bindings(true)
         .generate()
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
