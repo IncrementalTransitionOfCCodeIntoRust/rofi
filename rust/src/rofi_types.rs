@@ -1,11 +1,20 @@
-//
+/***
+ *  rofi_types
+***/
+
 extern crate glib;
+extern crate gtypes;
+
+use gtypes::primitive::gboolean;
+use glib_sys::GRegex;
+use glib_sys::gpointer;
+
+pub use crate::widget_internal::widget;
 
 /**
  * Type of property
  */
-enum PropertyType
-{
+enum PropertyType {
     /** Integer */
     P_INTEGER,
     /** Double */
@@ -61,8 +70,7 @@ enum RofiHighlightStyle {
 }
 
 /** Style of line */
-enum RofiLineStyle
-{
+pub enum RofiLineStyle {
     /** Solid line */
     ROFI_HL_SOLID,
     /** Dashed line */
@@ -72,8 +80,7 @@ enum RofiLineStyle
 /**
  * Distance unit type.
  */
-enum RofiPixelUnit
-{
+pub enum RofiPixelUnit {
     /** PixelWidth in pixels. */
     ROFI_PU_PX,
     /** PixelWidth in millimeters. */
@@ -89,8 +96,7 @@ enum RofiPixelUnit
 /**
  * Structure representing a distance.
  */
-enum RofiDistanceModifier
-{
+pub enum RofiDistanceModifier {
     ROFI_DISTANCE_MODIFIER_NONE,
     ROFI_DISTANCE_MODIFIER_ADD,
     ROFI_DISTANCE_MODIFIER_SUBTRACT,
@@ -100,25 +106,20 @@ enum RofiDistanceModifier
     ROFI_DISTANCE_MODIFIER_GROUP,
 }
 
-struct RofiDistanceUnit
-{
+pub struct RofiDistanceUnit {
     /** Distance */
     distance: f64,
     /** Unit type of the distance */
     _type: RofiPixelUnit,
     /** Type */
     modtype: RofiDistanceModifier,
-
     /** Modifier */
-    left: &RofiDistanceUnit,
-
+    left: Option<Box<RofiDistanceUnit>>,
     /** Modifier */
-    right: &RofiDistanceUnit,
-
+    right: Option<Box<RofiDistanceUnit>>
 }
 
-struct RofiDistance
-{
+pub struct RofiDistance {
     /** Base */
     base: RofiDistanceUnit,
     /** Style of the line (optional)*/
@@ -128,8 +129,7 @@ struct RofiDistance
 /**
  * Type of orientation.
  */
-enum RofiOrientation
-{
+pub enum RofiOrientation {
     ROFI_ORIENTATION_VERTICAL,
     ROFI_ORIENTATION_HORIZONTAL
 }
@@ -137,8 +137,7 @@ enum RofiOrientation
 /**
  * Represent the color in theme.
  */
-struct ThemeColor
-{
+struct ThemeColor {
     /** red channel */
     red: f64,
     /** green channel */
@@ -152,19 +151,17 @@ struct ThemeColor
 /**
  * RofiPadding
  */
-struct RofiPadding
-{
-    top: RofiDistance,
-    right: RofiDistance,
-    bottom: RofiDistance,
-    left: RofiDistance
+pub struct RofiPadding {
+    pub top: RofiDistance,
+    pub right: RofiDistance,
+    pub bottom: RofiDistance,
+    pub left: RofiDistance
 }
 
 /**
  * Theme highlight.
  */
-struct RofiHighlightColorStyle
-{
+struct RofiHighlightColorStyle {
     /** style to display */
     style: RofiHighlightStyle,
     /** Color */
@@ -180,8 +177,7 @@ struct RofiHighlightColorStyle
  *
  * @ingroup CONFIGURATION
  */
-enum WindowLocation
-{
+enum WindowLocation {
     /** Center */
     WL_CENTER     = 0,
     /** Top middle */
@@ -193,29 +189,40 @@ enum WindowLocation
     /** Middle left */
     WL_WEST       = 8,
     /** Left top corner. */
-    WL_NORTH_WEST = WL_NORTH | WL_WEST,
+    WL_NORTH_WEST = 1 | 8,
     /** Top right */
-    WL_NORTH_EAST = WL_NORTH | WL_EAST,
+    WL_NORTH_EAST = 1 | 2,
     /** Bottom right */
-    WL_SOUTH_EAST = WL_SOUTH | WL_EAST,
+    WL_SOUTH_EAST = 4 | 2,
     /** Bottom left */
-    WL_SOUTH_WEST = WL_SOUTH | WL_WEST
+    WL_SOUTH_WEST = 4 | 8
 }
 
-struct link
-{
+
+/**
+ * Property structure.
+ */
+struct Property {
+    /** Name of property */
+    name: String,
+    /** Type of property. */
+    _type: PropertyType,
+    /** Value */
+    value: _PropertyValue
+}
+
+struct Link {
     /** Name */
     name: String,
     /** Cached looked up ref */
-    _ref: &Property,
+    _ref: Option<Box<Property>>,
     /** Property default */
-    def_value: &Property
+    def_value: Option<Box<Property>>
 }
 
-union _PropertyValue
-{
+struct _PropertyValue {
     /** integer */
-    i: i32,
+    i: i16,
     /** Double */
     f: f64,
     /** String */
@@ -229,41 +236,26 @@ union _PropertyValue
     /** RofiPadding */
     padding: RofiPadding,
     /** Reference */
-    link: &link,
+    link: Option<Box<Link>>,
     /** Highlight Style */
     highlight: RofiHighlightColorStyle,
     /** List */
-    list: Vec
-}
-
-/**
- * Property structure.
- */
-struct Property
-{
-    /** Name of property */
-    name: String,
-    /** Type of property. */
-    _type: PropertyType,
-    /** Value */
-    value: PropertyValue
+    list: Vec<Box<widget>>
 }
 
 /**
  * Structure to hold a range.
  */
-struct rofi_range_pair
-{
-    start: i32,
-    stop: i32
+struct rofi_range_pair {
+    start: i16,
+    stop: i16
 }
 
 /**
  * Internal structure for matching.
  */
-struct rofi_int_matcher_t
-{
-    regex: &GRegex,
+struct rofi_int_matcher_t {
+    regex: Option<Box<GRegex>>,
     invert: gboolean
 }
 
@@ -271,8 +263,7 @@ struct rofi_int_matcher_t
  * Structure with data to process by each worker thread.
  * TODO: Make this more generic wrapper.
  */
-struct _thread_state
-{
+struct _thread_state {
     callback: fn(t: &_thread_state, data: gpointer) -> ()
 }
 
