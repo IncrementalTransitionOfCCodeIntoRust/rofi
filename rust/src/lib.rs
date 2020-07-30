@@ -11,10 +11,9 @@ pub use widget::*;
 pub use widget_internal::*;
 
 mod rofi_types;
-mod widget;
+mod _widget;
 mod widget_internal;
 mod _box;
-mod theme;
 
 #[cfg(test)]
 mod tests {

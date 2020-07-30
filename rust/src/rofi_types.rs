@@ -129,6 +129,7 @@ pub struct RofiDistance {
 /**
  * Type of orientation.
  */
+#[derive(PartialEq)]
 pub enum RofiOrientation {
     ROFI_ORIENTATION_VERTICAL,
     ROFI_ORIENTATION_HORIZONTAL

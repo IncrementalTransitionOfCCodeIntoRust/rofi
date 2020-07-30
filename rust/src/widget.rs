@@ -1,5 +1,5 @@
 /***
- *  widget_internals
+ *  _widget_internals
 ***/
 
 extern crate cairo;
@@ -7,8 +7,9 @@ extern crate glib;
 extern crate xcb;
 
 use crate::rofi_types::*;
-use crate::widget_internal::widget;
-pub use crate::widget_internal::WidgetTriggerActionCB;
+use crate::_widget_internal::_widget;
+pub use crate::_widget_internal::WidgetTriggerActionCB;
+pub use crate::_box::*;
 
 use cairo_sys::*;
 use std::any::Any;
@@ -22,7 +23,7 @@ pub const PI_2: f64 = 1.570796;
 pub enum WidgetType {
     /** Default type */
     WIDGET_TYPE_UNKNOWN,
-    /** The listview widget */
+    /** The listview _widget */
     WIDGET_TYPE_LISTVIEW = SCOPE_MOUSE_LISTVIEW,
     /** An element in the listview */
     WIDGET_TYPE_LISTVIEW_ELEMENT = SCOPE_MOUSE_LISTVIEW_ELEMENT,
@@ -30,7 +31,7 @@ pub enum WidgetType {
     WIDGET_TYPE_EDITBOX = SCOPE_MOUSE_EDITBOX,
     /** The listview scrollbar */
     WIDGET_TYPE_SCROLLBAR = SCOPE_MOUSE_SCROLLBAR,
-    /** A widget allowing user to swithc between modi */
+    /** A _widget allowing user to swithc between modi */
     WIDGET_TYPE_MODE_SWITCHER = SCOPE_MOUSE_MODE_SWITCHER,
     /** Text-only textbox */
     WIDGET_TYPE_TEXTBOX_TEXT,
@@ -50,15 +51,15 @@ pub enum WidgetTriggerActionResult {
     WIDGET_TRIGGER_ACTION_RESULT_GRAB_MOTION_END,
 }
 
-/** Macro to get widget from an implementation (e.g. textbox/scrollbar) */
-//#define WIDGET( a )    ( (widget *) ( a ) )   // TODO translate, or rewrite when used
+/** Macro to get _widget from an implementation (e.g. textbox/scrollbar) */
+//#define WIDGET( a )    ( (_widget *) ( a ) )   // TODO translate, or rewrite when used
 
 //####################################################################################################################
 
 const WIDGET_DEFAULT_PADDING: f64 = 0.0;
 
 //#define WIDGET_PADDING_INIT { { WIDGET_DEFAULT_PADDING, ROFI_PU_PX, ROFI_DISTANCE_MODIFIER_NONE, NULL, NULL }, ROFI_HL_SOLID }  // TODO translate
-fn widget_padding_init() -> RofiDistance {
+pub fn widget_padding_init() -> RofiDistance {
     RofiDistance {
         base: RofiDistanceUnit {
             distance: WIDGET_DEFAULT_PADDING,
@@ -114,7 +115,7 @@ unsafe fn draw_rounded_rect(
     cairo_close_path(d);
 }
 
-fn widget_init(wid: Box<widget>, parent: Option<Box<widget>>, _type: WidgetType, name: String) -> () {
+pub fn widget_init(wid: Box<_widget>, parent: Option<Box<_widget>>, _type: WidgetType, name: String) -> () {
     wid._type = _type;
     match parent {
         Some(val) => wid.parent = Some(val),
@@ -155,7 +156,7 @@ fn widget_init(wid: Box<widget>, parent: Option<Box<widget>>, _type: WidgetType,
     wid.enabled = rofi_theme_get_boolean(wid, "enabled", 1);
 }
 
-fn widget_set_state(wid: Box<widget>, state: String) -> () {
+pub fn widget_set_state(wid: Box<_widget>, state: String) -> () {
     if wid.state == state {
         // Update border.
         wid.border = rofi_theme_get_padding(wid, "border", wid.def_border);
@@ -171,12 +172,12 @@ fn widget_set_state(wid: Box<widget>, state: String) -> () {
     }
 }
 
-fn widget_intersect(wid: Box<widget>, x: i16, y: i16) -> i16 {
-    if x >= wid.x && x < (wid.x + wid.w) && y >= wid.y && y < (wid.y + wid.h) { 1 }
-    else { 0 }
+pub fn widget_intersect(wid: Box<_widget>, x: i16, y: i16) -> bool {
+    if x >= wid.x && x < (wid.x + wid.w) && y >= wid.y && y < (wid.y + wid.h) { true }
+    else { false }
 }
 
-fn widget_resize(wid: Box<widget>, w: i16, h: i16) -> () {
+pub fn widget_resize(wid: Box<_widget>, w: i16, h: i16) -> () {
     // check whether resize is implemented
     match wid.resize {
         Some(_impl) => {
@@ -194,24 +195,24 @@ fn widget_resize(wid: Box<widget>, w: i16, h: i16) -> () {
     widget_queue_redraw(wid);
 }
 
-fn widget_move(wid: Box<widget>, x: i16, y: i16) -> () {
+pub fn widget_move(wid: Box<_widget>, x: i16, y: i16) -> () {
     wid.x = x;
     wid.y = y;
 }
 
-fn widget_set_type(wid: Box<widget>, _type: WidgetType) -> () {
+pub fn widget_set_type(wid: Box<_widget>, _type: WidgetType) -> () {
     wid._type = _type;
 }
 
-fn widget_type(wid: Box<widget>) -> WidgetType {
+pub fn widget_type(wid: Box<_widget>) -> WidgetType {
     wid._type
 }
 
-fn widget_enabled(wid: Box<widget>) -> bool {
+pub fn widget_enabled(wid: Box<_widget>) -> bool {
     wid.enabled
 }
 
-fn widget_set_enabled(wid: Box<widget>, enabled: bool) -> () {
+pub fn widget_set_enabled(wid: Box<_widget>, enabled: bool) -> () {
     if wid.enabled != enabled {
         wid.enabled = enabled;
         widget_update(wid);
@@ -225,12 +226,12 @@ fn widget_set_enabled(wid: Box<widget>, enabled: bool) -> () {
     }
 }
 
-fn min(a: f64, b: f64) -> f64 {
+pub fn min(a: f64, b: f64) -> f64 {
     if a <= b { a }
     else { b }
 }
 
-fn widget_draw(wid: Box<widget>, d: *mut cairo_t) {
+pub fn widget_draw(wid: Box<_widget>, d: *mut cairo_t) {
     if wid.enabled {
         match wid.draw {
             Some(_impl) => {
@@ -298,7 +299,7 @@ fn widget_draw(wid: Box<widget>, d: *mut cairo_t) {
                 let minof_br = min(right_2, bottom_2);
                 let minof_bl = min(left_2, bottom_2);
         
-                // Contain border radius in widget space
+                // Contain border radius in _widget space
                 let vspace = wid.h - (margin_top + margin_bottom) - (top_2 + bottom_2);
                 let hspace = wid.w - (margin_left + margin_right) - (left_2 + right_2);
                 let vspace_2 = vspace / 2.0;
@@ -332,7 +333,7 @@ fn widget_draw(wid: Box<widget>, d: *mut cairo_t) {
                     cairo_set_line_width(d, 0.0);
                 }
         
-                fn calc_addtion_val(x: f64) -> f64 {
+                pub fn calc_addtion_val(x: f64) -> f64 {
                     match x > 2.0 {
                         true => x - 1.0,
                         false => match x == 1.0 {
@@ -342,7 +343,7 @@ fn widget_draw(wid: Box<widget>, d: *mut cairo_t) {
                     }
                 }
         
-                fn calc_substraction_val(x: f64) -> f64 {
+                pub fn calc_substraction_val(x: f64) -> f64 {
                     match x > 1.0 {
                         true => x - 1.0,
                         false => 0.0,
@@ -367,14 +368,14 @@ fn widget_draw(wid: Box<widget>, d: *mut cairo_t) {
                     cairo_fill_preserve(d);
                     cairo_clip(d);
         
-                    wid.draw(wid, d);   // TODO - draw is needed here!
+                    _impl(wid, d);   // TODO - draw is needed here!
                     wid.need_redraw = false;
         
                     cairo_restore(d);
         
                     if left != 0.0 || top != 0.0 || right != 0.0 || bottom != 0.0 {
                         cairo_save(d);
-                        cairo_translate(d, wid.x, wid.y);
+                        cairo_translate(d, wid.x.into(), wid.y.into());
                         cairo_new_path(d);
                         rofi_theme_get_color(wid, "border-color", d);
         
@@ -430,14 +431,14 @@ fn widget_draw(wid: Box<widget>, d: *mut cairo_t) {
                             d,
                             margin_left,
                             margin_top,
-                            wid.w - margin_right,
-                            wid.h - margin_top,
+                            wid.w.into() - margin_right,
+                            wid.h.into() - margin_top,
                             radius_out_tl,
                             radius_out_tr,
                             radius_out_br,
                             radius_out_bl,
                         );
-        
+
                         cairo_new_sub_path(d);
         
                         draw_rounded_rect(
@@ -461,11 +462,11 @@ fn widget_draw(wid: Box<widget>, d: *mut cairo_t) {
             None => {}
         }
     } // end if wid.enabled
-} // end widget_draw
+} // end _widget_draw
 
-//fn widget_free(wid: Box<widget>) -> ()    // not needed in RUst
+//pub fn widget_free(wid: Box<_widget>) -> ()    // not needed in RUst
 
-fn widget_get_height(wid: Box<widget>) -> i16 {
+pub fn widget_get_height(wid: Box<_widget>) -> i16 {
     match wid.get_height {
         Some(_impl) => {
             Some(_impl(wid)).unwrap()
@@ -476,7 +477,7 @@ fn widget_get_height(wid: Box<widget>) -> i16 {
     }
 }
 
-fn widget_get_width(wid: Box<widget>) -> i16 {
+pub fn widget_get_width(wid: Box<_widget>) -> i16 {
     match wid.get_width {
         Some(_impl) => {
             Some(_impl(wid)).unwrap()
@@ -487,24 +488,24 @@ fn widget_get_width(wid: Box<widget>) -> i16 {
     }
 }
 
-fn widget_get_x_pos(wid: Box<widget>) -> i16 {
+pub fn widget_get_x_pos(wid: Box<_widget>) -> i16 {
     wid.x
 }
 
-fn widget_get_y_pos(wid: Box<widget>) -> i16 {
+pub fn widget_get_y_pos(wid: Box<_widget>) -> i16 {
     wid.y
 }
 
-fn widget_xy_to_relative(wid: Box<widget>, x: i16, y: i16) -> () {
+pub fn widget_xy_to_relative(wid: Box<_widget>, x: i16, y: i16) -> () {
     x -= wid.x;
     y -= wid.y;
     match wid.parent {
-        Some(val) => widget_xy_to_relative(val, x, y),
+        Some(val) => _widget_xy_to_relative(val, x, y),
         None => {}
     }
 }
 
-fn widget_update(wid: Box<widget>) -> () {
+pub fn widget_update(wid: Box<_widget>) -> () {
     match wid.update {
         Some(_impl) => {
             Some(_impl(wid));
@@ -513,7 +514,7 @@ fn widget_update(wid: Box<widget>) -> () {
     }
 }
 
-fn top_parent(wid: Box<widget>) -> Box<widget> {
+pub fn top_parent(wid: Box<_widget>) -> Box<_widget> {
     match wid.parent {
         None => wid,
         Some(par) => {
@@ -523,27 +524,27 @@ fn top_parent(wid: Box<widget>) -> Box<widget> {
     }
 }
 
-fn widget_queue_redraw(wid: Box<widget>) -> () {
+pub fn widget_queue_redraw(wid: Box<_widget>) -> () {
     let top_parent = top_parent(wid);
     top_parent.need_redraw = true;
 }
 
-fn widget_need_redraw(wid: Box<widget>) -> bool {
+pub fn widget_need_redraw(wid: Box<_widget>) -> bool {
     if !wid.enabled { false }
     else { wid.need_redraw }
 }
 
-pub fn widget_find_mouse_target(wid: Box<widget>, _type: WidgetType, x: i16, y: i16) -> Box<widget> {
+pub fn widget_find_mouse_target(wid: Box<_widget>, _type: WidgetType, x: i16, y: i16) -> Option<Box<_widget>> {
     match wid.find_mouse_target {
         Some(_impl) => {
-            Some(_impl(wid, _type, x, y)).unwrap()
+            _impl(wid, _type, x, y)
         },
-        None => { wid } // TODO check previous conditions which would allow for None (NULL) return
+        None => { None }
     }
 }
 
 // TODO verify callback style against idiomatic Rust conventions (most probably "closures")
-fn widget_trigger_action(wid: Box<widget>, action: u16, x: i16, y: i16) -> WidgetTriggerActionResult {
+pub fn widget_trigger_action(wid: Box<_widget>, action: u16, x: i16, y: i16) -> WidgetTriggerActionResult {
     match wid.trigger_action {
         Some(_impl) => {
             Some(_impl(wid, action, x, y, wid.trigger_action_cb_data)).unwrap()
@@ -553,8 +554,8 @@ fn widget_trigger_action(wid: Box<widget>, action: u16, x: i16, y: i16) -> Widge
 }
 
 // TODO verify logic & functionality
-fn widget_set_trigger_action_handler(
-    wid: Box<widget>,
+pub fn widget_set_trigger_action_handler(
+    wid: Box<_widget>,
     cb: WidgetTriggerActionCB,
     cb_data: Option<Box<dyn Any>>,
 ) -> () {
@@ -562,11 +563,11 @@ fn widget_set_trigger_action_handler(
         wid.trigger_action_cb_data = cb_data;
 }
 
-fn widget_motion_notify(wid: Box<widget>, x: i16, y: i16) -> bool {
+pub fn widget_motion_notify(wid: Box<_widget>, x: i16, y: i16) -> bool {
     wid.motion_notify(wid, x, y)
 }
 
-fn widget_padding_get_left(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_left(wid: Box<_widget>) -> i16 {
     // TODO &wid was const
     let distance = distance_get_pixel(wid.padding.left, RofiOrientation::ROFI_ORIENTATION_HORIZONTAL);
     distance += distance_get_pixel(wid.border.left, RofiOrientation::ROFI_ORIENTATION_HORIZONTAL);
@@ -574,7 +575,7 @@ fn widget_padding_get_left(wid: Box<widget>) -> i16 {
     distance
 }
 
-fn widget_padding_get_right(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_right(wid: Box<_widget>) -> i16 {
     // TODO &wid was const
     let distance = distance_get_pixel(wid.padding.right, RofiOrientation::ROFI_ORIENTATION_HORIZONTAL);
     distance += distance_get_pixel(wid.border.right, RofiOrientation::ROFI_ORIENTATION_HORIZONTAL);
@@ -582,7 +583,7 @@ fn widget_padding_get_right(wid: Box<widget>) -> i16 {
     distance
 }
 
-fn widget_padding_get_top(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_top(wid: Box<_widget>) -> i16 {
     // TODO &wid was const
     let distance = distance_get_pixel(wid.padding.top, RofiOrientation::ROFI_ORIENTATION_VERTICAL);
     distance += distance_get_pixel(wid.border.top, RofiOrientation::ROFI_ORIENTATION_VERTICAL);
@@ -590,7 +591,7 @@ fn widget_padding_get_top(wid: Box<widget>) -> i16 {
     distance
 }
 
-fn widget_padding_get_bottom(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_bottom(wid: Box<_widget>) -> i16 {
     // TODO &wid was const
     let distance = distance_get_pixel(
         wid.padding.bottom,
@@ -607,59 +608,69 @@ fn widget_padding_get_bottom(wid: Box<widget>) -> i16 {
     distance
 }
 
-fn widget_padding_get_remaining_width(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_remaining_width(wid: Box<_widget>) -> i16 {
     // TODO &wid was const
     let width: i16 = wid.w;
-    width -= widget_padding_get_left(wid) as i16;
-    width -= widget_padding_get_right(wid) as i16;
+    width -= _widget_padding_get_left(wid) as i16;
+    width -= _widget_padding_get_right(wid) as i16;
     width
 }
 
-fn widget_padding_get_remaining_height(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_remaining_height(wid: Box<_widget>) -> i16 {
     let height: i16 = wid.h;
-    height -= widget_padding_get_top(wid) as i16;
-    height -= widget_padding_get_bottom(wid) as i16;
+    height -= _widget_padding_get_top(wid) as i16;
+    height -= _widget_padding_get_bottom(wid) as i16;
     height
 }
 
-fn widget_padding_get_padding_height(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_padding_height(wid: Box<_widget>) -> i16 {
     let height: i16 = 0;
-    height += widget_padding_get_top(wid) as i16;
-    height += widget_padding_get_bottom(wid) as i16;
+    height += _widget_padding_get_top(wid) as i16;
+    height += _widget_padding_get_bottom(wid) as i16;
     height
 }
 
-fn widget_padding_get_padding_width(wid: Box<widget>) -> i16 {
+pub fn widget_padding_get_padding_width(wid: Box<_widget>) -> i16 {
     let width: i16 = 0;
-    width += widget_padding_get_left(wid) as i16;
-    width += widget_padding_get_right(wid) as i16;
+    width += _widget_padding_get_left(wid) as i16;
+    width += _widget_padding_get_right(wid) as i16;
     width
 }
 
-fn widget_get_desired_height(wid: Box<widget>) -> i16 {
-    get_desired_height(wid)
+pub fn widget_get_desired_height(wid: Box<_widget>) -> i16 {
+    match wid.get_desired_height {
+        Some(_impl) => {
+            _impl(wid)
+        },
+        None => { wid.h }
+    }
 }
 
-fn widget_get_desired_width(wid: Box<widget>) -> i16 {
-    get_desired_width(wid);
+pub fn widget_get_desired_width(wid: Box<_widget>) -> i16 {
+    match wid.get_desired_width {
+        Some(_impl) => {
+            _impl(wid)
+        },
+        None => { wid.w }
+    }
 }
 
-fn widget_get_absolute_xpos(wid: Box<widget>) -> i16 {
+pub fn widget_get_absolute_xpos(wid: Box<_widget>) -> i16 {
     let retv = wid.x;
     match wid.parent {
         Some(par) => {
-            retv += widget_get_absolute_xpos(par);
+            retv += _widget_get_absolute_xpos(par);
         },
         None => {}
     }
     retv
 }
 
-fn widget_get_absolute_ypos(wid: Box<widget>) -> i16 {
-    let retv = widget_get_y_pos(wid);
+pub fn widget_get_absolute_ypos(wid: Box<_widget>) -> i16 {
+    let retv = _widget_get_y_pos(wid);
     match wid.parent {
         Some(par) => {
-            retv += widget_get_absolute_ypos(par);
+            retv += _widget_get_absolute_ypos(par);
         },
         None => {}
     }
@@ -669,19 +680,19 @@ fn widget_get_absolute_ypos(wid: Box<widget>) -> i16 {
 //####################################################################################################################
 
 /**
- * @param widget Handle to widget
+ * @param _widget Handle to _widget
  *
  * Disable the wid.
  */
-fn widget_disable(wid: Box<widget>) -> () {
-    widget_set_enabled(wid, false);
+pub fn widget_disable(wid: Box<_widget>) -> () {
+    _widget_set_enabled(wid, false);
 }
 
 /**
- * @param widget Handle to widget
+ * @param _widget Handle to _widget
  *
  * Enable the wid.
  */
-fn widget_enable(wid: Box<widget>) -> () {
-    widget_set_enabled(wid, true);
+pub fn widget_enable(wid: Box<_widget>) -> () {
+    _widget_set_enabled(wid, true);
 }
