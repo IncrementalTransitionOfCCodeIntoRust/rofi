@@ -1,14 +1,13 @@
 /***
- *  _widget_internals
+ *  widget_internals
 ***/
 
 extern crate cairo;
 extern crate glib;
 extern crate xcb;
 
-use crate::rofi_types::*;
-use crate::_widget_internal::_widget;
-pub use crate::_widget_internal::WidgetTriggerActionCB;
+use crate::widget_internal::_widget;
+pub use crate::widget_internal::WidgetTriggerActionCB;
 pub use crate::_box::*;
 
 use cairo_sys::*;
@@ -370,7 +369,7 @@ pub fn widget_draw(wid: Box<_widget>, d: *mut cairo_t) {
         
                     _impl(wid, d);   // TODO - draw is needed here!
                     wid.need_redraw = false;
-        
+
                     cairo_restore(d);
         
                     if left != 0.0 || top != 0.0 || right != 0.0 || bottom != 0.0 {
@@ -462,7 +461,7 @@ pub fn widget_draw(wid: Box<_widget>, d: *mut cairo_t) {
             None => {}
         }
     } // end if wid.enabled
-} // end _widget_draw
+} // end widget_draw
 
 //pub fn widget_free(wid: Box<_widget>) -> ()    // not needed in RUst
 
@@ -500,7 +499,7 @@ pub fn widget_xy_to_relative(wid: Box<_widget>, x: i16, y: i16) -> () {
     x -= wid.x;
     y -= wid.y;
     match wid.parent {
-        Some(val) => _widget_xy_to_relative(val, x, y),
+        Some(val) => widget_xy_to_relative(val, x, y),
         None => {}
     }
 }
@@ -564,7 +563,12 @@ pub fn widget_set_trigger_action_handler(
 }
 
 pub fn widget_motion_notify(wid: Box<_widget>, x: i16, y: i16) -> bool {
-    wid.motion_notify(wid, x, y)
+    match wid.motion_notify {
+        Some(_impl) => {
+            _impl(wid, x, y)
+        },
+        None => { false }
+    }
 }
 
 pub fn widget_padding_get_left(wid: Box<_widget>) -> i16 {
@@ -611,29 +615,29 @@ pub fn widget_padding_get_bottom(wid: Box<_widget>) -> i16 {
 pub fn widget_padding_get_remaining_width(wid: Box<_widget>) -> i16 {
     // TODO &wid was const
     let width: i16 = wid.w;
-    width -= _widget_padding_get_left(wid) as i16;
-    width -= _widget_padding_get_right(wid) as i16;
+    width -= widget_padding_get_left(wid) as i16;
+    width -= widget_padding_get_right(wid) as i16;
     width
 }
 
 pub fn widget_padding_get_remaining_height(wid: Box<_widget>) -> i16 {
     let height: i16 = wid.h;
-    height -= _widget_padding_get_top(wid) as i16;
-    height -= _widget_padding_get_bottom(wid) as i16;
+    height -= widget_padding_get_top(wid) as i16;
+    height -= widget_padding_get_bottom(wid) as i16;
     height
 }
 
 pub fn widget_padding_get_padding_height(wid: Box<_widget>) -> i16 {
     let height: i16 = 0;
-    height += _widget_padding_get_top(wid) as i16;
-    height += _widget_padding_get_bottom(wid) as i16;
+    height += widget_padding_get_top(wid) as i16;
+    height += widget_padding_get_bottom(wid) as i16;
     height
 }
 
 pub fn widget_padding_get_padding_width(wid: Box<_widget>) -> i16 {
     let width: i16 = 0;
-    width += _widget_padding_get_left(wid) as i16;
-    width += _widget_padding_get_right(wid) as i16;
+    width += widget_padding_get_left(wid) as i16;
+    width += widget_padding_get_right(wid) as i16;
     width
 }
 
@@ -659,7 +663,7 @@ pub fn widget_get_absolute_xpos(wid: Box<_widget>) -> i16 {
     let retv = wid.x;
     match wid.parent {
         Some(par) => {
-            retv += _widget_get_absolute_xpos(par);
+            retv += widget_get_absolute_xpos(par);
         },
         None => {}
     }
@@ -667,10 +671,10 @@ pub fn widget_get_absolute_xpos(wid: Box<_widget>) -> i16 {
 }
 
 pub fn widget_get_absolute_ypos(wid: Box<_widget>) -> i16 {
-    let retv = _widget_get_y_pos(wid);
+    let retv = widget_get_y_pos(wid);
     match wid.parent {
         Some(par) => {
-            retv += _widget_get_absolute_ypos(par);
+            retv += widget_get_absolute_ypos(par);
         },
         None => {}
     }
@@ -685,7 +689,7 @@ pub fn widget_get_absolute_ypos(wid: Box<_widget>) -> i16 {
  * Disable the wid.
  */
 pub fn widget_disable(wid: Box<_widget>) -> () {
-    _widget_set_enabled(wid, false);
+    widget_set_enabled(wid, false);
 }
 
 /**
@@ -694,5 +698,5 @@ pub fn widget_disable(wid: Box<_widget>) -> () {
  * Enable the wid.
  */
 pub fn widget_enable(wid: Box<_widget>) -> () {
-    _widget_set_enabled(wid, true);
+    widget_set_enabled(wid, true);
 }

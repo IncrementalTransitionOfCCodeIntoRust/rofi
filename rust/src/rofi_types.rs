@@ -9,7 +9,7 @@ use gtypes::primitive::gboolean;
 use glib_sys::GRegex;
 use glib_sys::gpointer;
 
-pub use crate::widget_internal::widget;
+pub use crate::widget_internal::_widget;
 
 /**
  * Type of property
@@ -241,7 +241,7 @@ struct _PropertyValue {
     /** Highlight Style */
     highlight: RofiHighlightColorStyle,
     /** List */
-    list: Vec<Box<widget>>
+    list: Vec<Box<_widget>>
 }
 
 /**

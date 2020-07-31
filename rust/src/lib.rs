@@ -7,13 +7,15 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 pub use gtypes::primitive::gboolean;
 pub use rofi_types::*;
-pub use widget::*;
 pub use widget_internal::*;
+pub use widget::*;
 
 mod rofi_types;
-mod _widget;
+mod widget;
 mod widget_internal;
 mod _box;
+mod theme;
+
 
 #[cfg(test)]
 mod tests {

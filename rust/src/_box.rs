@@ -4,7 +4,7 @@
 
 pub use crate::rofi_types::*;
 pub use crate::widget_internal::_widget;
-pub use crate::_widget::*;
+pub use crate::widget::*;
 
 use std::cmp;
 use std::option::Option;
