@@ -139,6 +139,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cty"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7313c0d620d0cb4dbd9d019e461a4beb501071ff46ec0ab933efb4daa76d73e3"
+
+[[package]]
 name = "either"
 version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -520,6 +526,8 @@ dependencies = [
  "bindgen",
  "cairo-rs",
  "cairo-sys-rs",
+ "cc",
+ "cty",
  "glib",
  "glib-sys",
  "gtypes",

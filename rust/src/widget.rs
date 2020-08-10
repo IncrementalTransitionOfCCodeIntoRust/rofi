@@ -9,6 +9,7 @@ extern crate xcb;
 use crate::widget_internal::_widget;
 pub use crate::widget_internal::WidgetTriggerActionCB;
 pub use crate::_box::*;
+pub use crate::theme::distance_get_pixel;
 
 use cairo_sys::*;
 use std::any::Any;
@@ -377,7 +378,7 @@ pub fn widget_draw(wid: Box<_widget>, d: *mut cairo_t) {
                         cairo_translate(d, wid.x.into(), wid.y.into());
                         cairo_new_path(d);
                         rofi_theme_get_color(wid, "border-color", d);
-        
+
                         let radius_out_tl = if radius_tl > 0.0 {
                             radius_tl + minof_tl
                         } else {

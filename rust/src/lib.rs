@@ -2,13 +2,14 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+//include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 
 pub use gtypes::primitive::gboolean;
 pub use rofi_types::*;
 pub use widget_internal::*;
 pub use widget::*;
+pub use theme::*;
 
 mod rofi_types;
 mod widget;

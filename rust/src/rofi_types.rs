@@ -108,22 +108,22 @@ pub enum RofiDistanceModifier {
 
 pub struct RofiDistanceUnit {
     /** Distance */
-    distance: f64,
+    pub distance: f64,
     /** Unit type of the distance */
-    _type: RofiPixelUnit,
+    pub _type: RofiPixelUnit,
     /** Type */
-    modtype: RofiDistanceModifier,
+    pub modtype: RofiDistanceModifier,
     /** Modifier */
-    left: Option<Box<RofiDistanceUnit>>,
+    pub left: Option<Box<RofiDistanceUnit>>,
     /** Modifier */
-    right: Option<Box<RofiDistanceUnit>>
+    pub right: Option<Box<RofiDistanceUnit>>
 }
 
 pub struct RofiDistance {
     /** Base */
-    base: RofiDistanceUnit,
+    pub base: RofiDistanceUnit,
     /** Style of the line (optional)*/
-    style: RofiLineStyle
+    pub style: RofiLineStyle
 }
 
 /**
@@ -153,10 +153,10 @@ struct ThemeColor {
  * RofiPadding
  */
 pub struct RofiPadding {
-    pub top: RofiDistance,
-    pub right: RofiDistance,
-    pub bottom: RofiDistance,
-    pub left: RofiDistance
+    pub top: Box<RofiDistance>,
+    pub right: Box<RofiDistance>,
+    pub bottom: Box<RofiDistance>,
+    pub left: Box<RofiDistance>
 }
 
 /**
