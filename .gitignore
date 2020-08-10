@@ -35,6 +35,10 @@
 /doc/*.doxy
 /gitconfig.h
 test/output.txt
+rust/target
+html/
+Doxyfile
+.vscode
 
 # I want to ignore log files
 *.log
