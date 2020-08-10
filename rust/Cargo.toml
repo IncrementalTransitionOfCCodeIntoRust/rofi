@@ -21,5 +21,5 @@ bindgen = "0.54.1"
 cc = "1.0.58"
 
 [lib]
-name = "libtheme"
+name = "rust_internals"
 crate-type = ["staticlib"]
