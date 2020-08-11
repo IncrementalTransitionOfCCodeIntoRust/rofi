@@ -19,7 +19,8 @@ fn main() {
         .use_core()
         // The input header we would like to generate
         // bindings for.
-        .header("wrapper.h")
+        .header("../include/theme.h")
+        .header("../include/widgets/widget-internal.h")
         .clang_arg("-I/usr/include/glib-2.0")
         .clang_arg("-I/usr/lib/glib-2.0/include")
         .clang_arg("-I/usr/include/cairo")
