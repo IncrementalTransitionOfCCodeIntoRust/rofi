@@ -792,7 +792,7 @@ void __create_window ( MenuFlags menu_flags )
     }
     // Setup font.
     // Dummy widget.
-    box        *win  = box_create ( NULL, "window", ROFI_ORIENTATION_HORIZONTAL );
+    box_       *win  = box_create ( NULL, "window", ROFI_ORIENTATION_HORIZONTAL );
     const char *font = rofi_theme_get_string ( WIDGET ( win ), "font", config.menu_font );
     if ( font ) {
         PangoFontDescription *pfd = pango_font_description_from_string ( font );
@@ -1432,7 +1432,7 @@ gboolean rofi_view_trigger_action ( RofiViewState *state, BindingsScope scope, g
     case SCOPE_MOUSE_MODE_SWITCHER:
     {
         gint   x = state->mouse.x, y = state->mouse.y;
-        widget *target = widget_find_mouse_target ( WIDGET ( state->main_window ), scope, x, y );
+        widget *target = widget_find_mouse_target ( WIDGET ( state->main_window ), (WidgetType) scope, x, y );
         if ( target == NULL ) {
             return FALSE;
         }
@@ -1653,7 +1653,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
      */
     if ( strcmp ( name, "mainbox" ) == 0 ) {
         wid = (widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_VERTICAL );
-        box_add ( (box *) parent_widget, WIDGET ( wid ), TRUE );
+        box_add ( (box_ *) parent_widget, WIDGET ( wid ), TRUE );
         if ( config.sidebar_mode ) {
             defaults = "inputbar,message,listview,mode-switcher";
         }
@@ -1667,7 +1667,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
     else if ( strcmp ( name, "inputbar" ) == 0 ) {
         wid      = (widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_HORIZONTAL );
         defaults = "prompt,entry,overlay,case-indicator";
-        box_add ( (box *) parent_widget, WIDGET ( wid ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( wid ), FALSE );
     }
     /**
      * PROMPT
@@ -1680,17 +1680,17 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
         // Prompt box.
         state->prompt = textbox_create ( parent_widget, WIDGET_TYPE_TEXTBOX_TEXT, name, TB_AUTOWIDTH | TB_AUTOHEIGHT, NORMAL, "", 0, 0 );
         rofi_view_update_prompt ( state );
-        box_add ( (box *) parent_widget, WIDGET ( state->prompt ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->prompt ), FALSE );
         defaults = NULL;
     }
     else if ( strcmp ( name, "num-rows" ) == 0 ) {
         state->tb_total_rows = textbox_create ( parent_widget, WIDGET_TYPE_TEXTBOX_TEXT, name, TB_AUTOWIDTH | TB_AUTOHEIGHT, NORMAL, "", 0, 0 );
-        box_add ( (box *) parent_widget, WIDGET ( state->tb_total_rows ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->tb_total_rows ), FALSE );
         defaults = NULL;
     }
     else if ( strcmp ( name, "num-filtered-rows" ) == 0 ) {
         state->tb_filtered_rows = textbox_create ( parent_widget, WIDGET_TYPE_TEXTBOX_TEXT, name, TB_AUTOWIDTH | TB_AUTOHEIGHT, NORMAL, "", 0, 0 );
-        box_add ( (box *) parent_widget, WIDGET ( state->tb_filtered_rows ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->tb_filtered_rows ), FALSE );
         defaults = NULL;
     }
     /**
@@ -1703,7 +1703,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
         }
         state->case_indicator = textbox_create ( parent_widget, WIDGET_TYPE_TEXTBOX_TEXT, name, TB_AUTOWIDTH | TB_AUTOHEIGHT, NORMAL, "*", 0, 0 );
         // Add small separator between case indicator and text box.
-        box_add ( (box *) parent_widget, WIDGET ( state->case_indicator ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->case_indicator ), FALSE );
         textbox_text ( state->case_indicator, get_matching_state () );
     }
     /**
@@ -1718,7 +1718,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
         TextboxFlags tfl = TB_EDITABLE;
         tfl        |= ( ( state->menu_flags & MENU_PASSWORD ) == MENU_PASSWORD ) ? TB_PASSWORD : 0;
         state->text = textbox_create ( parent_widget, WIDGET_TYPE_EDITBOX, name, tfl | TB_AUTOHEIGHT, NORMAL, NULL, 0, 0 );
-        box_add ( (box *) parent_widget, WIDGET ( state->text ), TRUE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->text ), TRUE );
     }
     /**
      * MESSAGE
@@ -1732,7 +1732,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
         state->mesg_tb  = textbox_create ( WIDGET ( state->mesg_box ), WIDGET_TYPE_TEXTBOX_TEXT, "textbox", TB_AUTOHEIGHT | TB_MARKUP | TB_WRAP, NORMAL, NULL, 0, 0 );
         container_add ( state->mesg_box, WIDGET ( state->mesg_tb ) );
         rofi_view_reload_message_bar ( state );
-        box_add ( (box *) parent_widget, WIDGET ( state->mesg_box ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->mesg_box ), FALSE );
     }
     /**
      * LISTVIEW
@@ -1743,7 +1743,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
             return;
         }
         state->list_view = listview_create ( parent_widget, name, update_callback, state, config.element_height, 0 );
-        box_add ( (box *) parent_widget, WIDGET ( state->list_view ), TRUE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->list_view ), TRUE );
         // Set configuration
         listview_set_multi_select ( state->list_view, ( state->menu_flags & MENU_INDICATOR ) == MENU_INDICATOR );
         listview_set_scroll_type ( state->list_view, config.scroll_method );
@@ -1762,7 +1762,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
             return;
         }
         state->sidebar_bar = box_create ( parent_widget, name, ROFI_ORIENTATION_HORIZONTAL );
-        box_add ( (box *) parent_widget, WIDGET ( state->sidebar_bar ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->sidebar_bar ), FALSE );
         state->num_modi = rofi_get_num_enabled_modi ();
         state->modi     = g_malloc0 ( state->num_modi * sizeof ( textbox * ) );
         for ( unsigned int j = 0; j < state->num_modi; j++ ) {
@@ -1775,25 +1775,25 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
     }
     else if ( g_ascii_strcasecmp ( name, "overlay" ) == 0 ) {
         state->overlay = textbox_create ( WIDGET ( parent_widget ), WIDGET_TYPE_TEXTBOX_TEXT, "overlay", TB_AUTOWIDTH | TB_AUTOHEIGHT, URGENT, "blaat", 0.5, 0 );
-        box_add ( (box *) parent_widget, WIDGET ( state->overlay ), FALSE );
+        box_add ( (box_ *) parent_widget, WIDGET ( state->overlay ), FALSE );
         widget_disable ( WIDGET ( state->overlay ) );
     }
     else if (  g_ascii_strncasecmp ( name, "textbox", 7 ) == 0 ) {
         textbox *t = textbox_create ( parent_widget, WIDGET_TYPE_TEXTBOX_TEXT, name, TB_AUTOHEIGHT | TB_WRAP, NORMAL, "", 0, 0 );
-        box_add ( (box *) parent_widget, WIDGET ( t ), TRUE );
+        box_add ( (box_ *) parent_widget, WIDGET ( t ), TRUE );
     }
     else if (  g_ascii_strncasecmp ( name, "button", 6 ) == 0 ) {
         textbox *t = textbox_create ( parent_widget, WIDGET_TYPE_EDITBOX, name, TB_AUTOHEIGHT | TB_WRAP, NORMAL, "", 0, 0 );
-        box_add ( (box *) parent_widget, WIDGET ( t ), TRUE );
+        box_add ( (box_ *) parent_widget, WIDGET ( t ), TRUE );
         widget_set_trigger_action_handler ( WIDGET ( t ), textbox_button_trigger_action, state );
     }
     else if (  g_ascii_strncasecmp ( name, "icon", 4 ) == 0 ) {
         icon *t = icon_create ( parent_widget, name );
-        box_add ( (box *) parent_widget, WIDGET ( t ), TRUE );
+        box_add ( (box_ *) parent_widget, WIDGET ( t ), TRUE );
     }
     else {
         wid = (widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_VERTICAL );
-        box_add ( (box *) parent_widget, WIDGET ( wid ), TRUE );
+        box_add ( (box_ *) parent_widget, WIDGET ( wid ), TRUE );
         //g_error("The widget %s does not exists. Invalid layout.", name);
     }
     if ( wid ) {
@@ -1890,7 +1890,7 @@ int rofi_view_error_dialog ( const char *msg, int markup )
     state->finalize   = process_result;
 
     state->main_window = box_create ( NULL, "window", ROFI_ORIENTATION_VERTICAL );
-    box *box = box_create ( WIDGET ( state->main_window ), "error-message", ROFI_ORIENTATION_VERTICAL );
+    box_ *box = box_create ( WIDGET ( state->main_window ), "error-message", ROFI_ORIENTATION_VERTICAL );
     box_add ( state->main_window, WIDGET ( box ), TRUE );
     state->text = textbox_create ( WIDGET ( box ), WIDGET_TYPE_TEXTBOX_TEXT, "textbox", ( TB_AUTOHEIGHT | TB_WRAP ) + ( ( markup ) ? TB_MARKUP : 0 ),
                                    NORMAL, ( msg != NULL ) ? msg : "", 0, 0 );

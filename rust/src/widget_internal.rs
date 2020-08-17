@@ -2,13 +2,10 @@
  *  _widget_internals
 ***/
 
-extern crate glib;
-
-pub use crate::bindings::RofiPadding;
+pub use crate::bindings::{RofiPadding, _cairo};
 pub use crate::widget_::WidgetType;
 pub use crate::widget_::WidgetTriggerActionResult;
 
-use cairo_sys::cairo_t;
 use std::any::Any;
 
 pub type WidgetTriggerActionCB = Option<fn(wid: *mut _widget, action: u16, x: i16, y: i16, user_data: Option<Box<dyn Any>>) -> WidgetTriggerActionResult>;
@@ -50,7 +47,7 @@ pub struct _widget {
     /** get height of _widget implementation function */
     pub get_height: Option<fn(*mut _widget) -> i16>,
     /** draw _widget implementation function */
-    pub draw: Option<fn(widget: *mut _widget, draw: *mut cairo_t) -> ()>,
+    pub draw: Option<fn(widget: *mut _widget, draw: *mut _cairo) -> ()>,
     /** resize _widget implementation function */
     pub resize: Option<fn(*mut _widget, i16, i16) -> ()>,
     /** update _widget implementation function */
@@ -62,7 +59,7 @@ pub struct _widget {
     pub get_desired_height: Option<fn(*mut _widget) -> i16>,
     pub get_desired_width: Option<fn(*mut _widget) -> i16>,
 
-    pub set_state: Option<fn(*mut _widget, String) -> ()>,  // String was const
+    pub set_state: Option<fn(*mut _widget, *const cty::c_char) -> ()>,
 
     /** _widget find_mouse_target callback */        // TODO tranlate
     pub find_mouse_target: Option<fn(wid: *mut _widget, type_: WidgetType, x: i16, y: i16) -> Option<*mut _widget>>,
@@ -79,6 +76,6 @@ pub struct _widget {
     pub free: fn(widget: *mut _widget) -> (),
 
     /** Name of _widget (used for theming) */
-    pub name: String,
-    pub state: String,   // state was const
+    pub name: *mut cty::c_char,
+    pub state: *const cty::c_char,
 }

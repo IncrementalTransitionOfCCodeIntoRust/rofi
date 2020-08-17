@@ -20645,7 +20645,6 @@ extern "C" {
     pub fn strerror(__errnum: cty::c_int) -> *mut cty::c_char;
 }
 extern "C" {
-    #[link_name = "\u{1}__xpg_strerror_r"]
     pub fn strerror_r(
         __errnum: cty::c_int,
         __buf: *mut cty::c_char,
@@ -59336,18 +59335,6 @@ extern "C" {
     pub fn sscanf(__s: *const cty::c_char, __format: *const cty::c_char, ...) -> cty::c_int;
 }
 extern "C" {
-    #[link_name = "\u{1}__isoc99_fscanf"]
-    pub fn fscanf1(__stream: *mut FILE, __format: *const cty::c_char, ...) -> cty::c_int;
-}
-extern "C" {
-    #[link_name = "\u{1}__isoc99_scanf"]
-    pub fn scanf1(__format: *const cty::c_char, ...) -> cty::c_int;
-}
-extern "C" {
-    #[link_name = "\u{1}__isoc99_sscanf"]
-    pub fn sscanf1(__s: *const cty::c_char, __format: *const cty::c_char, ...) -> cty::c_int;
-}
-extern "C" {
     pub fn vfscanf(
         __s: *mut FILE,
         __format: *const cty::c_char,
@@ -59359,26 +59346,6 @@ extern "C" {
 }
 extern "C" {
     pub fn vsscanf(
-        __s: *const cty::c_char,
-        __format: *const cty::c_char,
-        __arg: *mut __va_list_tag,
-    ) -> cty::c_int;
-}
-extern "C" {
-    #[link_name = "\u{1}__isoc99_vfscanf"]
-    pub fn vfscanf1(
-        __s: *mut FILE,
-        __format: *const cty::c_char,
-        __arg: *mut __va_list_tag,
-    ) -> cty::c_int;
-}
-extern "C" {
-    #[link_name = "\u{1}__isoc99_vscanf"]
-    pub fn vscanf1(__format: *const cty::c_char, __arg: *mut __va_list_tag) -> cty::c_int;
-}
-extern "C" {
-    #[link_name = "\u{1}__isoc99_vsscanf"]
-    pub fn vsscanf1(
         __s: *const cty::c_char,
         __format: *const cty::c_char,
         __arg: *mut __va_list_tag,

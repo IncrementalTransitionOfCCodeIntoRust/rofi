@@ -13,13 +13,14 @@ use crate::bindings::{
 };
 use crate::widget_internal::_widget;
 
-use pub_functions::to_const_i8;
+use crate::pub_functions::to_const_i8;
 
 use std::mem::{self, MaybeUninit};
 
 /**
  * Whether and how the action was handled
  */
+#[repr(u8)]
 pub enum WidgetTriggerActionResult {
     /** The action was ignore and should bubble */
     WIDGET_TRIGGER_ACTION_RESULT_IGNORED,
@@ -34,25 +35,27 @@ pub enum WidgetTriggerActionResult {
 /**
  * Type of the wid. It is used to bubble events to the relevant wid.
  */
+#[repr(u8)]
 pub enum WidgetType {
     /** Default type */
     WIDGET_TYPE_UNKNOWN,
     /** The listview _widget */
-    WIDGET_TYPE_LISTVIEW = BindingsScope_SCOPE_MOUSE_LISTVIEW as isize,
+    WIDGET_TYPE_LISTVIEW = BindingsScope_SCOPE_MOUSE_LISTVIEW as u8,
     /** An element in the listview */
-    WIDGET_TYPE_LISTVIEW_ELEMENT = BindingsScope_SCOPE_MOUSE_LISTVIEW_ELEMENT as isize,
+    WIDGET_TYPE_LISTVIEW_ELEMENT = BindingsScope_SCOPE_MOUSE_LISTVIEW_ELEMENT as u8,
     /** The input bar edit box */
-    WIDGET_TYPE_EDITBOX = BindingsScope_SCOPE_MOUSE_EDITBOX as isize,
+    WIDGET_TYPE_EDITBOX = BindingsScope_SCOPE_MOUSE_EDITBOX as u8,
     /** The listview scrollbar */
-    WIDGET_TYPE_SCROLLBAR = BindingsScope_SCOPE_MOUSE_SCROLLBAR as isize,
+    WIDGET_TYPE_SCROLLBAR = BindingsScope_SCOPE_MOUSE_SCROLLBAR as u8,
     /** A _widget allowing user to swithc between modi */
-    WIDGET_TYPE_MODE_SWITCHER = BindingsScope_SCOPE_MOUSE_MODE_SWITCHER as isize,
+    WIDGET_TYPE_MODE_SWITCHER = BindingsScope_SCOPE_MOUSE_MODE_SWITCHER as u8,
     /** Text-only textbox */
     WIDGET_TYPE_TEXTBOX_TEXT,
 }
 
-const WIDGET_DEFAULT_PADDING: f64 = 0.0;
+pub const WIDGET_DEFAULT_PADDING: f64 = 0.0;
 
+#[no_mangle]
 pub fn widget_padding_init() -> RofiDistance {
     RofiDistance {
         base: RofiDistanceUnit {
@@ -66,44 +69,43 @@ pub fn widget_padding_init() -> RofiDistance {
     }
 }
 
-pub fn widget_init(wid: *mut _widget, parent: Option<*mut _widget>, type_: WidgetType, name: String) -> () {
-    unsafe {
-        (*wid).type_ = type_;
-        (*wid).parent = parent;
-        (*wid).name = name;
-        (*wid).def_padding = RofiPadding {
-            top: widget_padding_init(),
-            right: widget_padding_init(),
-            bottom: widget_padding_init(),
-            left: widget_padding_init(),
-        };
-        (*wid).def_border = RofiPadding {
-            top: widget_padding_init(),
-            right: widget_padding_init(),
-            bottom: widget_padding_init(),
-            left: widget_padding_init(),
-        };
-        (*wid).def_border_radius = RofiPadding {
-            top: widget_padding_init(),
-            right: widget_padding_init(),
-            bottom: widget_padding_init(),
-            left: widget_padding_init(),
-        };
-        (*wid).def_margin = RofiPadding {
-            top: widget_padding_init(),
-            right: widget_padding_init(),
-            bottom: widget_padding_init(),
-            left: widget_padding_init(),
-        };
+#[no_mangle]
+pub unsafe extern "C" fn widget_init(wid: *mut _widget, parent: Option<*mut _widget>, type_: WidgetType, name: *mut cty::c_char) -> () {
+    (*wid).type_ = type_;
+    (*wid).parent = parent;
+    (*wid).name = name;
+    (*wid).def_padding = RofiPadding {
+        top: widget_padding_init(),
+        right: widget_padding_init(),
+        bottom: widget_padding_init(),
+        left: widget_padding_init(),
+    };
+    (*wid).def_border = RofiPadding {
+        top: widget_padding_init(),
+        right: widget_padding_init(),
+        bottom: widget_padding_init(),
+        left: widget_padding_init(),
+    };
+    (*wid).def_border_radius = RofiPadding {
+        top: widget_padding_init(),
+        right: widget_padding_init(),
+        bottom: widget_padding_init(),
+        left: widget_padding_init(),
+    };
+    (*wid).def_margin = RofiPadding {
+        top: widget_padding_init(),
+        right: widget_padding_init(),
+        bottom: widget_padding_init(),
+        left: widget_padding_init(),
+    };
 
-        let bindings_wid = wid as *const widget;
-        (*wid).padding= rofi_theme_get_padding(bindings_wid, to_const_i8("padding"), (*bindings_wid).def_padding);
-        (*wid).border = rofi_theme_get_padding(bindings_wid, to_const_i8("border"), (*bindings_wid).def_border);
-        (*wid).border_radius = rofi_theme_get_padding(bindings_wid, to_const_i8("border-radius"), (*bindings_wid).def_border_radius);
-        (*wid).margin = rofi_theme_get_padding(bindings_wid, to_const_i8("margin"), (*bindings_wid).def_margin);
+    let bindings_wid = wid as *const widget;
+    (*wid).padding= rofi_theme_get_padding(bindings_wid, to_const_i8("padding"), (*bindings_wid).def_padding);
+    (*wid).border = rofi_theme_get_padding(bindings_wid, to_const_i8("border"), (*bindings_wid).def_border);
+    (*wid).border_radius = rofi_theme_get_padding(bindings_wid, to_const_i8("border-radius"), (*bindings_wid).def_border_radius);
+    (*wid).margin = rofi_theme_get_padding(bindings_wid, to_const_i8("margin"), (*bindings_wid).def_margin);
 
-        // bled by default
-        let bool_res = rofi_theme_get_boolean(bindings_wid, to_const_i8("enabled"), 1) != 0;
-        (*wid).enabled = bool_res as bool;
-    }
+    // bled by default
+    let bool_res = rofi_theme_get_boolean(bindings_wid, to_const_i8("enabled"), 1) != 0;
+    (*wid).enabled = bool_res as bool;
 }

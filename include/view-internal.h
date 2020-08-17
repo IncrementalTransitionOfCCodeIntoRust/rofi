@@ -30,7 +30,7 @@
 #include "widgets/container.h"
 #include "widgets/widget.h"
 #include "widgets/textbox.h"
-#include "widgets/box.h"
+#include "../rust/c_headers/box.h"
 #include "widgets/icon.h"
 #include "widgets/listview.h"
 #include "keyb.h"
@@ -52,7 +52,7 @@ struct RofiViewState
     /** Flag indicating if view needs to be refiltered. */
     int              refilter;
     /** Widget representing the main container. */
-    box              *main_window;
+    box_             *main_window;
     /** #textbox showing the prompt in the input bar. */
     textbox          *prompt;
     /** #textbox with the user input in the input bar. */
@@ -96,7 +96,7 @@ struct RofiViewState
     workarea         mon;
 
     /** #box holding the different modi buttons */
-    box              *sidebar_bar;
+    box_             *sidebar_bar;
     /** number of modi to display */
     unsigned int     num_modi;
     /** Array of #textbox that act as buttons for switching modi */

@@ -31,7 +31,7 @@
 #include <widgets/textbox.h>
 #include <widgets/scrollbar.h>
 #include <widgets/icon.h>
-#include <widgets/box.h>
+#include <c_headers/box.h>
 #include <widgets/listview.h>
 
 #include "settings.h"
