@@ -30,7 +30,7 @@
 #include "widgets/container.h"
 #include "widgets/widget.h"
 #include "widgets/textbox.h"
-#include "../rust/c_headers/box.h"
+#include "../rust/c_headers/box_.h"
 #include "widgets/icon.h"
 #include "widgets/listview.h"
 #include "keyb.h"

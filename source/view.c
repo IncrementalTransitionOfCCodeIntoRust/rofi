@@ -69,6 +69,8 @@
 
 #include "xcb.h"
 
+#include "../rust/c_headers/box_.h"
+
 /**
  * @param state The handle to the view
  * @param qr    Indicate if queue_redraw should be called on changes.
@@ -1643,16 +1645,16 @@ static void rofi_view_listview_mouse_activated_cb ( listview *lv, gboolean custo
     state->skip_absorb = TRUE;
 }
 
-static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, const char *name )
+static void rofi_view_add_widget ( RofiViewState *state, _widget *parent_widget, const char *name )
 {
     char   *defaults = NULL;
-    widget *wid      = NULL;
+    _widget *wid      = NULL;
 
     /**
      * MAINBOX
      */
     if ( strcmp ( name, "mainbox" ) == 0 ) {
-        wid = (widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_VERTICAL );
+        wid = (_widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_VERTICAL );
         box_add ( (box_ *) parent_widget, WIDGET ( wid ), TRUE );
         if ( config.sidebar_mode ) {
             defaults = "inputbar,message,listview,mode-switcher";
@@ -1665,7 +1667,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
      * INPUTBAR
      */
     else if ( strcmp ( name, "inputbar" ) == 0 ) {
-        wid      = (widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_HORIZONTAL );
+        wid      = (_widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_HORIZONTAL );
         defaults = "prompt,entry,overlay,case-indicator";
         box_add ( (box_ *) parent_widget, WIDGET ( wid ), FALSE );
     }
@@ -1792,7 +1794,7 @@ static void rofi_view_add_widget ( RofiViewState *state, widget *parent_widget, 
         box_add ( (box_ *) parent_widget, WIDGET ( t ), TRUE );
     }
     else {
-        wid = (widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_VERTICAL );
+        wid = (_widget *) box_create ( parent_widget, name, ROFI_ORIENTATION_VERTICAL );
         box_add ( (box_ *) parent_widget, WIDGET ( wid ), TRUE );
         //g_error("The widget %s does not exists. Invalid layout.", name);
     }

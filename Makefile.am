@@ -71,7 +71,7 @@ SOURCES=\
 	source/theme.c\
 	source/rofi-types.c\
 	source/rofi-icon-fetcher.c\
-	#source/widgets/box.c\
+	source/widgets/box.c\
 	source/widgets/container.c\
 	source/widgets/icon.c\
 	source/widgets/widget.c\
@@ -675,10 +675,14 @@ $(RUST_LIB): $(RUST_SOURCE)
 	cd $(rust_dir) && \
 	CARGO_TARGET_DIR=$(rust_target_dir) cargo build --verbose $(CARGO_RELEASE_ARGS)
 
-# EXTRA_DIST += \
-# 	$(RUST_SOURCE) \
-# 	$(RUST_EXTRA)
+EXTRA_DIST += \
+	$(RUST_SOURCE) \
+	$(RUST_EXTRA)
 
-# rofi_LDADD += $(RUST_LIB)
+rofi_LDADD += $(RUST_LIB)
+
+# solve undefined reference to 'dlsym' caused by newer
+# versions of gcc/ld default to linking with --as-needed.
+rofi_LDFLAGS = -Wl,--no-as-needed -ldl
 
 #########################################################################################

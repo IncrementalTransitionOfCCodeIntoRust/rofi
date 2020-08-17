@@ -31,7 +31,7 @@
 #include <widgets/textbox.h>
 #include <widgets/scrollbar.h>
 #include <widgets/icon.h>
-#include <c_headers/box.h>
+#include "../rust/c_headers/box_.h"
 #include <widgets/listview.h>
 
 #include "settings.h"
@@ -61,7 +61,7 @@ typedef enum
 
 typedef struct
 {
-    box     *box;
+    box_    *box;
     textbox *textbox;
     textbox *index;
     icon    *icon;
@@ -165,25 +165,25 @@ static void listview_set_state ( _listview_row r, TextBoxFontType tbft )
         break;
     }
 }
-static void listview_add_widget ( listview *lv, _listview_row *row, widget *wid, const char *label )
+static void listview_add_widget ( listview *lv, _listview_row *row, _widget *wid, const char *label )
 {
     TextboxFlags flags = ( lv->multi_select ) ? TB_INDICATOR : 0;
     if ( strcasecmp ( label, "element-icon" ) == 0 ) {
         if ( config.show_icons ) {
             row->icon = icon_create ( WIDGET ( wid ), "element-icon" );
-            box_add ( (box *)wid, WIDGET ( row->icon ), FALSE );
+            box_add ( (box_ *)wid, WIDGET ( row->icon ), FALSE );
         }
     }
     else if ( strcasecmp ( label, "element-text" ) == 0 ) {
         row->textbox = textbox_create ( WIDGET ( wid ), WIDGET_TYPE_TEXTBOX_TEXT, "element-text", TB_AUTOHEIGHT | flags, NORMAL, "DDD", 0, 0 );
-        box_add ( (box *)wid, WIDGET ( row->textbox ), TRUE );
+        box_add ( (box_ *)wid, WIDGET ( row->textbox ), TRUE );
     }
     else if ( strcasecmp ( label, "element-index" ) == 0 ) {
         row->index = textbox_create ( WIDGET ( wid ), WIDGET_TYPE_TEXTBOX_TEXT, "element-text", TB_AUTOHEIGHT, NORMAL, " ", 0, 0 );
-        box_add ( (box *)wid, WIDGET ( row->index ), FALSE );
+        box_add ( (box_ *)wid, WIDGET ( row->index ), FALSE );
     } else {
         widget *wid2 = (widget *) box_create ( wid, label, ROFI_ORIENTATION_VERTICAL );
-        box_add ( (box *) wid, WIDGET ( wid2 ), TRUE );
+        box_add ( (box_ *) wid, WIDGET ( wid2 ), TRUE );
         GList *list = rofi_theme_get_list ( WIDGET ( wid2 ), "children", "" );
         for ( GList *iter = g_list_first ( list ); iter != NULL; iter = g_list_next ( iter ) ) {
             listview_add_widget ( lv,row, wid2, (const char *)iter->data );
