@@ -39,6 +39,7 @@ rust/target
 html/
 Doxyfile
 .vscode
+rust/src/pub_functions/target
 
 # I want to ignore log files
 *.log
